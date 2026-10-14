@@ -24,15 +24,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Don't loop redirect if already on login or register
-      if (
-        !window.location.pathname.includes('/login') &&
-        !window.location.pathname.includes('/signup')
-      ) {
-        localStorage.removeItem('tripmate_token');
-        localStorage.removeItem('tripmate_user');
-        window.location.href = '/login';
-      }
+      localStorage.removeItem('tripmate_token');
+      localStorage.removeItem('tripmate_user');
     }
     return Promise.reject(error);
   }

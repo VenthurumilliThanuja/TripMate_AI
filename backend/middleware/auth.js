@@ -1,6 +1,23 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const ensureGuestUser = async () => {
+  const guestEmail = process.env.GUEST_EMAIL || 'guest@tripmate.ai';
+
+  let guestUser = await User.findOne({ email: guestEmail.toLowerCase() });
+  if (!guestUser) {
+    guestUser = await User.create({
+      name: 'Guest Traveler',
+      email: guestEmail.toLowerCase(),
+      password: process.env.GUEST_PASSWORD || 'guest12345',
+      currency: '₹',
+      bio: 'Demo traveler access',
+    });
+  }
+
+  return guestUser;
+};
+
 const protect = async (req, res, next) => {
   try {
     let token;
@@ -12,10 +29,8 @@ const protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Access denied. No authentication token provided.',
-      });
+      req.user = await ensureGuestUser();
+      return next();
     }
 
     const decoded = jwt.verify(
@@ -25,19 +40,15 @@ const protect = async (req, res, next) => {
 
     const user = await User.findById(decoded.id).select('-password');
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'The user belonging to this token no longer exists.',
-      });
+      req.user = await ensureGuestUser();
+      return next();
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token. Please log in again.',
-    });
+    req.user = await ensureGuestUser();
+    next();
   }
 };
 

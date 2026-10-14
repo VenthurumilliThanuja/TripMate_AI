@@ -8,9 +8,6 @@ import Navbar from './components/layout/Navbar';
 import MobileNav from './components/layout/MobileNav';
 import TripFormModal from './components/trips/TripFormModal';
 
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import Trips from './pages/Trips';
 import TripDetails from './pages/TripDetails';
@@ -20,9 +17,9 @@ import Profile from './pages/Profile';
 import api from './api/axios';
 import { useToast } from './context/ToastContext';
 
-// Protected Route Wrapper
+// Login has been removed; the app opens directly in guest mode.
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -30,7 +27,7 @@ const ProtectedRoute = ({ children }) => {
       </div>
     );
   }
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return children;
 };
 
 // Main App Layout
@@ -125,12 +122,6 @@ export default function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-
-            {/* Protected app routes */}
             <Route
               path="/*"
               element={
